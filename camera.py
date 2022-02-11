@@ -41,8 +41,6 @@ class ASL:
 
                 print(count)
 
-                # self.overlay_image()
-
                 if count % 100 == 0:
                     prediction = asl_predictor.predict(frame)
 
@@ -56,9 +54,6 @@ class ASL:
                     self.FONT_SIZE, # font size
                     self.FONT_COLOR, # font color
                     self.FONT_STROKE) # font stroke
-
-                # Horizontally flip the image
-                frame = cv2.flip(frame, 1)
 
                 # Step last_step: Send the image to the virtual camera for processing
                 cam.send(frame)
