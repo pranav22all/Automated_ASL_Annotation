@@ -5,7 +5,7 @@ import cv2
 import torch
 import matplotlib
 
-from ASL_Predictor import ASLResnet, predict_image
+from ASL_Predictor import ASLMediaPipeNet, ASLResnet, predict_image
 
 class ASL:
     def __init__(self, width=1280, height=720, fps=20):
@@ -30,8 +30,11 @@ class ASL:
         self.FONT_STROKE = cv2.LINE_4
 
     def run(self):
-        model = ASLResnet()
-        model.load_state_dict(torch.load('checkpoints/asl-colored-resnet34-mvp.pth', map_location=torch.device('cpu')))
+        # model = ASLResnet()
+        # model.load_state_dict(torch.load('checkpoints/asl-colored-resnet34-mvp.pth', map_location=torch.device('cpu')))
+        model = ASLMediaPipeNet()
+        model.load_state_dict(torch.load('checkpoints/asl-colored-mediapipe-mvp2.pth', map_location=torch.device('cpu')))
+        # model.load_state_dict(torch.load('checkpoints/asl-colored-mediapipe-mvp.pth', map_location=torch.device('cpu')))
 
         with pyvirtualcam.Camera(width=self.width, height=self.height, fps=self.fps, fmt=PixelFormat.BGR) as cam:
             print(f'Virtual cam started: {cam.device} ({cam.width}x{cam.height} @ {cam.fps}fps)')
@@ -45,12 +48,23 @@ class ASL:
 
                 print(count)
 
-                if count % 50 == 0:
-                    img = cv2.resize(frame, (200, 200))
+                if count % 10 == 0:
+                    # img = cv2.resize(frame, (200, 200))
                     # plt.imshow(img)
                     # plt.show()
-                    prediction = predict_image(img, model)
+                    top_contenders, prediction = predict_image(frame, model, mediapipe=True)
                     print(prediction)
+
+                # cv2.putText(
+                #     frame, # image
+                #     str(top_contenders), # text
+                #     # for longer words, starting point is further left
+                #     (100, \
+                #         200), # position at which writing has to start
+                #     self.FONT_FAMILY, # font family
+                #     2, # font size
+                #     self.FONT_COLOR, # font color
+                #     self.FONT_STROKE) # font stroke
 
                 cv2.putText(
                     frame, # image
