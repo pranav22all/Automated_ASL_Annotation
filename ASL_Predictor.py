@@ -34,8 +34,9 @@ device = get_default_device()
 classes = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 
                 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
                 'u', 'v', 'w', 'x', 'y', 'z', 'SPACE', 'DEL']
-train_dir = '../asl/train/asl_alphabet_train/asl_alphabet_train'
 
+train_dir = '../asl/train/asl_alphabet_train/asl_alphabet_train'
+#train_dir = '/Users/pranav/ASL_ALPHABET_DATASET/asl_alphabet_train/asl_alphabet_train'
 
 class ASL_Predictor:
     def __init__(self):
