@@ -1,6 +1,7 @@
 import cv2 
 import numpy as np
 import mediapipe as mp
+import torch
 
 STANDARD_HEIGHT = 200
 STANDARD_WIDTH = 200
@@ -18,11 +19,13 @@ class ExtractHandFeatures:
             
             #For training change this line, don't need to flip (since images appear to be from back-facing camera) 
             #Convert cv2 BGR image to RGB image and flip (since image coming from front-facing camera)  
-            processed = hands.process(cv2.flip(cv2.cvtColor(self.raw_image, cv2.COLOR_BGR2RGB), 1))
+            #processed = hands.process(cv2.flip(cv2.cvtColor(self.raw_image, cv2.COLOR_BGR2RGB), 1))
+            processed = hands.process(cv2.cvtColor(self.raw_image, cv2.COLOR_BGR2RGB))
 
             #No hand detected (Figure out how we want to handle, 126 vector with all 0s?): 
             if not processed.multi_hand_landmarks: 
-                return False
+                zeros = torch.tensor(np.array([0] * 126), dtype=torch.float32)
+                return zeros
             
             feature_vector = [] 
             #Could have one or two hands: 
@@ -44,7 +47,8 @@ class ExtractHandFeatures:
                 zero_vector = [0] * 63 
                 feature_vector.extend(zero_vector)
             
-            return feature_vector
+            output = torch.tensor(np.array(feature_vector), dtype=torch.float32)
+            return output
 
 
     

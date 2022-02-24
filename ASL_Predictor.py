@@ -7,6 +7,7 @@ import mediapipe as mp
 import numpy as np
 import cv2 as cv2
 from torchvision.datasets import ImageFolder
+from feature_extraction import ExtractHandFeatures
 
 STANDARD_HEIGHT = 200
 STANDARD_WIDTH = 200
@@ -130,51 +131,52 @@ class ASLMediaPipeNet(ImageClassificationBase):
         for param in self.network.parameters():
             param.require_grad = True
 
-def process_mediapipe(img):
-    image = np.array(img)
-    mp_hands = mp.solutions.hands
-    with mp_hands.Hands(static_image_mode = True,max_num_hands = 2,
-        min_detection_confidence = MIN_CONFIDENCE_LEVEL) as hands:
+# def process_mediapipe(img):
+#     image = np.array(img)
+#     mp_hands = mp.solutions.hands
+#     with mp_hands.Hands(static_image_mode = True,max_num_hands = 2,
+#         min_detection_confidence = MIN_CONFIDENCE_LEVEL) as hands:
 
-        #For training change this line, don't need to flip (since images appear to be from back-facing camera) 
-        #Convert cv2 BGR image to RGB image and flip (since image coming from front-facing camera)  
-        # processed = hands.process(cv2.flip(image, 1))
-        processed = hands.process(image)
+#         #For training change this line, don't need to flip (since images appear to be from back-facing camera) 
+#         #Convert cv2 BGR image to RGB image and flip (since image coming from front-facing camera)  
+#         # processed = hands.process(cv2.flip(image, 1))
+#         processed = hands.process(image)
 
-        #No hand detected (Figure out how we want to handle, 126 vector with all 0s?): 
-        if not processed.multi_hand_landmarks: 
-            zeros = torch.tensor(np.array([0] * 126), dtype=torch.float32)
-            return zeros
+#         #No hand detected (Figure out how we want to handle, 126 vector with all 0s?): 
+#         if not processed.multi_hand_landmarks: 
+#             zeros = torch.tensor(np.array([0] * 126), dtype=torch.float32)
+#             return zeros
 
-        feature_vector = [] 
-        #Could have one or two hands: 
-        for hand in processed.multi_hand_landmarks: 
-            for curr_landmark in hand.landmark: 
-                x = curr_landmark.x 
-                feature_vector.append(x)
+#         feature_vector = [] 
+#         #Could have one or two hands: 
+#         for hand in processed.multi_hand_landmarks: 
+#             for curr_landmark in hand.landmark: 
+#                 x = curr_landmark.x 
+#                 feature_vector.append(x)
 
-                y = curr_landmark.y 
-                feature_vector.append(y)
+#                 y = curr_landmark.y 
+#                 feature_vector.append(y)
 
-                z = curr_landmark.z
-                feature_vector.append(z)
+#                 z = curr_landmark.z
+#                 feature_vector.append(z)
 
-        #If we have just one hand, zero out the remaining (to ensure constant vector size of 126)
-        #Might cause problems in one-hand case if we care which hand is visible/showing sign language
-        #Solution to this is to use processed.multi_handedness
-        if (len(feature_vector) == 63):
-            zero_vector = [0] * 63 
-            feature_vector.extend(zero_vector)
+#         #If we have just one hand, zero out the remaining (to ensure constant vector size of 126)
+#         #Might cause problems in one-hand case if we care which hand is visible/showing sign language
+#         #Solution to this is to use processed.multi_handedness
+#         if (len(feature_vector) == 63):
+#             zero_vector = [0] * 63 
+#             feature_vector.extend(zero_vector)
         
-        output = torch.tensor(np.array(feature_vector), dtype=torch.float32)
+#         output = torch.tensor(np.array(feature_vector), dtype=torch.float32)
 
-        return output
+#         return output
     
 def predict_image(img, model, mediapipe=False):
     # Convert to a batch of 1
     if mediapipe:
-        img = process_mediapipe(img)
-        xb = to_device(img.unsqueeze(0), device)
+        hand_features_object = ExtractHandFeatures(img)
+        curr_features = hand_features_object.generate_features()
+        xb = to_device(curr_features.unsqueeze(0), device)
     else:
         img = torch.tensor(img, dtype=torch.float).reshape((3, img.shape[1], img.shape[0]))
         xb = to_device(img.unsqueeze(0), device)
