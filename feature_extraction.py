@@ -73,7 +73,7 @@ class ExtractHandFeatures:
                 return zeros
 
             output = torch.tensor(np.array(feature_vector), dtype=torch.float32)
-            print(output)
+            #print(output)
             return output
 
 
