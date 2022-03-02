@@ -8,6 +8,7 @@ import numpy as np
 import cv2 as cv2
 from torchvision.datasets import ImageFolder
 from feature_extraction import ExtractHandFeatures
+from old_feature_extraction import OldExtractHandFeatures
 
 STANDARD_HEIGHT = 200
 STANDARD_WIDTH = 200
@@ -36,8 +37,8 @@ classes = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
                 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
                 'u', 'v', 'w', 'x', 'y', 'z', 'SPACE', 'DEL']
 
-train_dir = '../asl/train/asl_alphabet_train/asl_alphabet_train'
-#train_dir = '/Users/pranav/ASL_ALPHABET_DATASET/asl_alphabet_train/asl_alphabet_train'
+#train_dir = '../asl/train/asl_alphabet_train/asl_alphabet_train'
+train_dir = '/Users/pranav/ASL_ALPHABET_DATASET/asl_alphabet_train/asl_alphabet_train'
 
 class ASL_Predictor:
     def __init__(self):
@@ -174,7 +175,7 @@ class ASLMediaPipeNet(ImageClassificationBase):
 def predict_image(img, model, mediapipe=False):
     # Convert to a batch of 1
     if mediapipe:
-        hand_features_object = ExtractHandFeatures(img)
+        hand_features_object = OldExtractHandFeatures(img)
         curr_features = hand_features_object.generate_features()
         xb = to_device(curr_features.unsqueeze(0), device)
     else:
