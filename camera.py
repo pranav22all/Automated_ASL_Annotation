@@ -52,6 +52,9 @@ class ASL:
                     # img = cv2.resize(frame, (200, 200))
                     # plt.imshow(img)
                     # plt.show()
+                    # cv2.imwrite('test_image.jpeg', frame)
+                    # cv2.imshow("Test Image", frame)
+
                     top_contenders, prediction = predict_image(frame, model, mediapipe=True)
                     print(prediction)
 
