@@ -5,7 +5,7 @@ import cv2
 import torch
 import matplotlib
 
-from ASL_Predictor import ASLMediaPipeNet, ASLResnet, predict_image
+from ASL_Predictor import ASLMediaPipeNet, ASLResnet,ASLDeepNet, predict_image
 
 class ASL:
     def __init__(self, width=1280, height=720, fps=20):
@@ -32,8 +32,9 @@ class ASL:
     def run(self):
         # model = ASLResnet()
         # model.load_state_dict(torch.load('checkpoints/asl-colored-resnet34-mvp.pth', map_location=torch.device('cpu')))
-        model = ASLMediaPipeNet()
-        model.load_state_dict(torch.load('checkpoints/asl-colored-mediapipe-mvp2.pth', map_location=torch.device('cpu')))
+        model = ASLDeepNet()
+        model.load_state_dict(torch.load('checkpoints/asl-colored-mediapipe-mvp3.pth', map_location=torch.device('cpu')))
+        model.eval()
         # model.load_state_dict(torch.load('checkpoints/asl-colored-mediapipe-mvp.pth', map_location=torch.device('cpu')))
 
         with pyvirtualcam.Camera(width=self.width, height=self.height, fps=self.fps, fmt=PixelFormat.BGR) as cam:
