@@ -13,6 +13,7 @@ class OldExtractHandFeatures:
         self.raw_image = raw_image
 
     def generate_features(self): 
+        import pdb; pdb.set_trace()
         mp_hands = mp.solutions.hands
         with mp_hands.Hands(static_image_mode = True,max_num_hands = 2,
             min_detection_confidence = MIN_CONFIDENCE_LEVEL) as hands:
