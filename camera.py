@@ -5,7 +5,7 @@ import cv2
 import torch
 import pyttsx3
 
-from ASL_Predictor import ASLMediaPipeNet, ASLResnet, predict_image
+from ASL_Predictor import ASLMediaPipeNet, ASLResnet,ASLDeepNet, predict_image
 
 
 class ASL:
@@ -37,12 +37,20 @@ class ASL:
                         'W', 'X', 'Y', 'Z'}
 
     def run(self):
+        ######## ASLResnet ########
         # model = ASLResnet()
         # model.load_state_dict(torch.load('checkpoints/asl-colored-resnet34-mvp.pth', map_location=torch.device('cpu')))
+
+        ######## ASLMediaPipeNet ########
         model = ASLMediaPipeNet()
-        model.load_state_dict(torch.load(
-            'checkpoints/asl-colored-mediapipe-mvp2.pth', map_location=torch.device('cpu')))
         # model.load_state_dict(torch.load('checkpoints/asl-colored-mediapipe-mvp.pth', map_location=torch.device('cpu')))
+        model.load_state_dict(torch.load('checkpoints/asl-colored-mediapipe-mvp2.pth', map_location=torch.device('cpu')))
+
+        ######## ASLDeepNet ########
+        # model = ASLDeepNet()
+        # model.load_state_dict(torch.load('checkpoints/asl-colored-mediapipe-mvp3.pth', map_location=torch.device('cpu')))
+        # model.eval()
+
         self.engine.startLoop(False)
         with pyvirtualcam.Camera(width=self.width, height=self.height, fps=self.fps, fmt=PixelFormat.BGR) as cam:
             print(f'Virtual cam started: {cam.device} ({cam.width}x{cam.height} @ {cam.fps}fps)')

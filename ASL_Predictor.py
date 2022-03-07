@@ -132,6 +132,44 @@ class ASLMediaPipeNet(ImageClassificationBase):
         for param in self.network.parameters():
             param.require_grad = True
 
+class ASLDeepNet(ImageClassificationBase):
+    def __init__(self):
+        super().__init__()        
+        self.linear_relu_stack = nn.Sequential(
+            nn.Linear(126, 256),
+            nn.ReLU(),
+            nn.BatchNorm1d(256),
+            nn.Linear(256, 256),
+            nn.ReLU(),
+            nn.BatchNorm1d(256),
+            nn.Linear(256, 256),
+            nn.ReLU(),
+            nn.BatchNorm1d(256),
+            nn.Linear(256, 128),
+            nn.ReLU(),
+            nn.BatchNorm1d(128),
+            nn.Dropout(p=0.25),
+            nn.Linear(128, 29),            
+        )
+        
+        self.network = self.linear_relu_stack
+        self.dataset = ImageFolder(train_dir)
+    
+    def forward(self, xb):
+        return self.network(xb)
+    
+    def freeze(self):
+        # To freeze the residual layers
+        for param in self.network.parameters():
+            param.require_grad = False
+#         for param in self.network.fc.parameters():
+#             param.require_grad = True
+    
+    def unfreeze(self):
+        # Unfreeze all layers
+        for param in self.network.parameters():
+            param.require_grad = True
+
 # def process_mediapipe(img):
 #     image = np.array(img)
 #     mp_hands = mp.solutions.hands
