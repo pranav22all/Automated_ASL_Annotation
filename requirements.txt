@@ -4,3 +4,4 @@ mediapipe
 torch
 torchvision
 matplotlib
+pyttsx3

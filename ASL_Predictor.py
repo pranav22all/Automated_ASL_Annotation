@@ -37,8 +37,8 @@ classes = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
                 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
                 'u', 'v', 'w', 'x', 'y', 'z', 'SPACE', 'DEL']
 
-#train_dir = '../asl/train/asl_alphabet_train/asl_alphabet_train'
-train_dir = '/Users/pranav/ASL_ALPHABET_DATASET/asl_alphabet_train/asl_alphabet_train'
+train_dir = '../asl/asl_alphabet_train/asl_alphabet_train'
+# train_dir = '/Users/pranav/ASL_ALPHABET_DATASET/asl_alphabet_train/asl_alphabet_train'
 
 class ASL_Predictor:
     def __init__(self):
@@ -190,6 +190,6 @@ def predict_image(img, model, mediapipe=False):
     d = [(i, arr[i]) for i in range(len(arr))]
     d.sort(key=lambda x:x[1], reverse=True)
     res = [model.dataset.classes[i[0]] for i in d]
-    print(res)
+    # print(res)
     # Retrieve the class label
     return [res[:3], model.dataset.classes[preds[0].item()]]
