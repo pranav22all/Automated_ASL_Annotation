@@ -83,8 +83,8 @@ for curr_folder in folders:
 for letter_dir in os.listdir(train_dir): 
     letter_path = os.path.join(train_dir, letter_dir)
     num_files = len(os.listdir(letter_path))
-    print("Currently looking at the following folder: " + letter_dir)
-    print("There are " + str(num_files) + " files in this folder")
+    # print("Currently looking at the following folder: " + letter_dir)
+    # print("There are " + str(num_files) + " files in this folder")
 
 
 # In[ ]:
