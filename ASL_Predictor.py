@@ -8,6 +8,7 @@ import numpy as np
 import cv2 as cv2
 from torchvision.datasets import ImageFolder
 from feature_extraction import ExtractHandFeatures
+from feature_extraction import ExtractAngleFeatures
 from old_feature_extraction import OldExtractHandFeatures
 
 STANDARD_HEIGHT = 200
@@ -149,7 +150,7 @@ class ASLDeepNet(ImageClassificationBase):
             nn.ReLU(),
             nn.BatchNorm1d(128),
             nn.Dropout(p=0.25),
-            nn.Linear(128, 29),            
+            nn.Linear(128, 29),           
         )
         
         self.network = self.linear_relu_stack
@@ -209,12 +210,23 @@ class ASLDeepNet(ImageClassificationBase):
 #         output = torch.tensor(np.array(feature_vector), dtype=torch.float32)
 
 #         return output
+
+dataset = ImageFolder(train_dir)
     
-def predict_image(img, model, mediapipe=False):
+def predict_image(img, model, mediapipe=False, feature='OLD'):
     # Convert to a batch of 1
     if mediapipe:
-        hand_features_object = OldExtractHandFeatures(img)
-        curr_features = hand_features_object.generate_features()
+        features_obj = None
+        if feature == 'ANGLED':
+            features_obj = ExtractAngleFeatures(img)
+
+        elif feature == 'HANDED':
+            features_obj = ExtractHandFeatures(img)
+
+        else:
+            features_obj = OldExtractHandFeatures(img)
+
+        curr_features = features_obj.generate_features()
         xb = to_device(curr_features.unsqueeze(0), device)
     else:
         img = torch.tensor(img, dtype=torch.float).reshape((3, img.shape[1], img.shape[0]))
@@ -224,10 +236,4 @@ def predict_image(img, model, mediapipe=False):
     # Pick index with highest probability
     _, preds  = torch.max(yb, dim=1)
 
-    arr = yb.tolist()[0]
-    d = [(i, arr[i]) for i in range(len(arr))]
-    d.sort(key=lambda x:x[1], reverse=True)
-    res = [model.dataset.classes[i[0]] for i in d]
-    # print(res)
-    # Retrieve the class label
-    return [res[:3], model.dataset.classes[preds[0].item()]]
+    return dataset.classes[preds[0].item()]

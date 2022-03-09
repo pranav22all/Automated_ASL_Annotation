@@ -5,7 +5,7 @@ import cv2
 import torch
 import pyttsx3
 
-from ASL_Predictor import ASLMediaPipeNet, ASLResnet,ASLDeepNet, predict_image
+from ASL_Predictor import ASLMediaPipeNet, ASLResnet, ASLDeepNet, predict_image
 
 
 class ASL:
@@ -42,14 +42,14 @@ class ASL:
         # model.load_state_dict(torch.load('checkpoints/asl-colored-resnet34-mvp.pth', map_location=torch.device('cpu')))
 
         ######## ASLMediaPipeNet ########
-        model = ASLMediaPipeNet()
+        # model = ASLMediaPipeNet()
         # model.load_state_dict(torch.load('checkpoints/asl-colored-mediapipe-mvp.pth', map_location=torch.device('cpu')))
-        model.load_state_dict(torch.load('checkpoints/asl-colored-mediapipe-mvp2.pth', map_location=torch.device('cpu')))
+        # model.load_state_dict(torch.load('checkpoints/asl-colored-mediapipe-mvp2.pth', map_location=torch.device('cpu')))
 
         ######## ASLDeepNet ########
-        # model = ASLDeepNet()
-        # model.load_state_dict(torch.load('checkpoints/asl-colored-mediapipe-mvp3.pth', map_location=torch.device('cpu')))
-        # model.eval()
+        model = ASLDeepNet()
+        model.load_state_dict(torch.load('checkpoints/asl-colored-mediapipe-mvp2-customdata-handed-combined.pth', map_location=torch.device('cpu')))
+        model.eval()
 
         self.engine.startLoop(False)
         with pyvirtualcam.Camera(width=self.width, height=self.height, fps=self.fps, fmt=PixelFormat.BGR) as cam:
@@ -57,6 +57,8 @@ class ASL:
             count = 0
             buffer = ''
             candidate_votes = list()
+            space_count = 0
+
             while True:
                 # Step 1: Read an image from the webcam
                 _, frame = self.camera.read()
@@ -65,17 +67,14 @@ class ASL:
                     continue
 
                 print(count)
-                top_contenders, prediction = predict_image(
-                    frame, model, mediapipe=True)
+
+                prediction = predict_image(
+                    frame, model, mediapipe=True, feature='HANDED')
+
+                print(prediction)
                 candidate_votes.append(prediction)
 
-                if count > 0 and count % 30 == 0:
-                    # img = cv2.resize(frame, (200, 200))
-                    # plt.imshow(img)
-                    # plt.show()
-                    # cv2.imwrite('test_image.jpeg', frame)
-                    # cv2.imshow("Test Image", frame)
-
+                if count > 0 and count % 20 == 0:
                     # "vote" on the prediction that is most frequent
                     best_pred = max(set(candidate_votes),
                                     key=candidate_votes.count)
@@ -97,8 +96,54 @@ class ASL:
                         word = buffer.split(' ')[-1]
                         self.engine.say(word.lower())
                         self.engine.iterate()
-
                         buffer += ' '
+
+                    if buffer and best_pred == 'del':
+                        buffer = buffer[:-1]
+
+                    #     # "vote" on the prediction that is most frequent
+                    #     best_pred = max(set(candidate_votes),
+                    #                     key=candidate_votes.count)
+
+                    #     spoken = False
+
+
+                    #     if len(buffer) >= 16:
+                    #         space_index = buffer.find(' ')
+                    #         if space_index == -1:
+                    #             buffer = ''
+
+                    #         else:
+                    #             buffer = buffer[space_index+1:]
+
+                    #     if best_pred == 'space' or best_pred == 'nothing':
+                    #         space_count += 1
+
+                    #     # only add prediction to buffer if it's a letter (ignoring SPACE, DELETE, NOTHING)
+                    #     if best_pred in self.LETTERS:
+                    #         buffer += best_pred
+                    #         space_count = 0
+
+                    #     print('space count', space_count)
+                    #     if space_count >= 2:
+                    #         if buffer and buffer[-1] == ' ':
+                    #             buffer = buffer[:-1]
+
+                    #         spoken = True
+
+                    #         print('SAYING THIS:', buffer.lower() + '.')
+                    #         self.engine.say(buffer.lower())
+                    #         self.engine.iterate()
+                    #         space_count = 0
+
+                    #     # only add space if we have at least a non-space character in the buffer
+                    #     if buffer and buffer[-1] != ' ' and (best_pred == 'space' or best_pred == 'nothing'):
+                    #         buffer += ' '
+
+
+                        # if spoken:
+                            # buffer = ''
+                            # spoken = False
 
                     candidate_votes.clear()
 
